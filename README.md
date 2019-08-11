@@ -1,4 +1,4 @@
-# :radio: Playlists by Tallinn :musical_score:
+# :musical_score: Playlists by Tallinn :radio:
 
 ### Deploy to Google Cloud Functions
 
