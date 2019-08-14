@@ -1,4 +1,4 @@
-package playlistsbytallinn
+package radio
 
 import (
 	"encoding/json"
@@ -7,12 +7,22 @@ import (
 	"log"
 )
 
-type rdsResponse struct {
-	RDS string `json:"rds"`
+const rdsURL = "https://raadiotallinn.err.ee/api/rds/getForChannel?channel=raadiotallinn"
+
+func NewRaadioTallinn() Radio {
+	return &raadioTallinn{
+		rdsURL:         rdsURL,
+		httpClientFunc: getLazyHTTPClient,
+	}
 }
 
-func CurrentTrack() (string, error) {
-	res, err := httpClient.Get(rdsURL)
+type raadioTallinn struct {
+	rdsURL         string
+	httpClientFunc func() httpClient
+}
+
+func (r *raadioTallinn) CurrentTrack() (string, error) {
+	res, err := r.httpClientFunc().Get(r.rdsURL)
 	if err != nil {
 		return "", errors.Wrap(err, "RDS request failed")
 	}
@@ -33,4 +43,9 @@ func CurrentTrack() (string, error) {
 	}
 
 	return responseBody.RDS, nil
+
+}
+
+type rdsResponse struct {
+	RDS string `json:"rds"`
 }
