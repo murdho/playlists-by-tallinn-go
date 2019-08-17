@@ -2,11 +2,11 @@ package playlistsbytallinn
 
 import (
 	"context"
+	"github.com/murdho/playlists-by-tallinn/internal"
 	"github.com/murdho/playlists-by-tallinn/radio"
 	"github.com/murdho/playlists-by-tallinn/storage"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"log"
 	"os"
 )
 
@@ -19,7 +19,7 @@ func init() {
 	InitSystem(
 		radio.NewRaadioTallinn(),
 		storage.NewFirestoreStorage(gcpProject, "playlists-by-tallinn"),
-		SetupLogger(debug),
+		internal.NewLogger(debug),
 	)
 }
 
@@ -69,19 +69,4 @@ func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
 
 type PubSubMessage struct {
 	Data []byte `json:"data"`
-}
-
-func SetupLogger(debug bool) *zap.Logger {
-	config := zap.NewProductionConfig()
-
-	if debug {
-		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	}
-
-	logger, err := config.Build()
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "building zap logger failed"))
-	}
-
-	return logger
 }
