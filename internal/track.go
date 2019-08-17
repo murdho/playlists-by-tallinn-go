@@ -1,10 +1,8 @@
 package internal
 
-import "fmt"
-
 type Track struct {
-	Name     string
-	Persists bool
+	Name     string `firestore:"name"`
+	Persists bool   `firestore:"persists"`
 }
 
 func NewTrack(name string, persists bool) *Track {
@@ -12,8 +10,4 @@ func NewTrack(name string, persists bool) *Track {
 		Name:     name,
 		Persists: persists,
 	}
-}
-
-func (t *Track) String() string {
-	return fmt.Sprintf("<Track name=%#v persists=%t>", t.Name, t.Persists)
 }
