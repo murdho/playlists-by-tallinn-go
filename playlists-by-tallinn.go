@@ -31,7 +31,7 @@ func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
 		return errors.Wrap(err, "getting current track failed")
 	}
 
-	sys.logger.Debug("current track", zap.String("name", trackName))
+	sys.logger.Info("current track", zap.String("name", trackName))
 
 	if trackName == "" {
 		sys.logger.Debug("current track empty, all done")
