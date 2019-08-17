@@ -13,7 +13,7 @@ gcloud functions deploy PlaylistsByTallinn \
                             --region europe-west1 \
                             --runtime go111 \
                             --memory 128MB \
-                            --timeout 5s \
+                            --timeout 2s
 ```
 
 ### Run in development
