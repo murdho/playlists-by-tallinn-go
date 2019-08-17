@@ -24,7 +24,7 @@ type firestoreStorage struct {
 	collectionName     string
 }
 
-func (f *firestoreStorage) LoadTrack(trackName string) (*internal.Track, error) {
+func (f *firestoreStorage) LoadTrack(ctx context.Context, trackName string) (*internal.Track, error) {
 	track := internal.NewTrack(trackName, false)
 
 	client, err := f.getFirestoreClient()
@@ -32,7 +32,7 @@ func (f *firestoreStorage) LoadTrack(trackName string) (*internal.Track, error) 
 		return nil, errors.Wrap(err, "getting Firestore client failed")
 	}
 
-	snapshot, err := f.getDocument(client, trackName).Get(context.Background())
+	snapshot, err := f.getDocument(client, trackName).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return track, nil
@@ -50,13 +50,13 @@ func (f *firestoreStorage) LoadTrack(trackName string) (*internal.Track, error) 
 	return track, nil
 }
 
-func (f *firestoreStorage) SaveTrack(track *internal.Track) error {
+func (f *firestoreStorage) SaveTrack(ctx context.Context, track *internal.Track) error {
 	client, err := f.getFirestoreClient()
 	if err != nil {
 		return errors.Wrap(err, "getting Firestore client failed")
 	}
 
-	if _, err := f.getDocument(client, track.Name).Set(context.Background(), track); err != nil {
+	if _, err := f.getDocument(client, track.Name).Set(ctx, track); err != nil {
 		return errors.Wrap(err, "saving track failed")
 	}
 

@@ -1,6 +1,7 @@
 package playlistsbytallinn
 
 import (
+	"context"
 	"github.com/murdho/playlists-by-tallinn/internal"
 	"go.uber.org/zap"
 )
@@ -24,6 +25,6 @@ type Radio interface {
 }
 
 type TrackStorage interface {
-	LoadTrack(trackName string) (*internal.Track, error)
-	SaveTrack(*internal.Track) error
+	LoadTrack(ctx context.Context, trackName string) (*internal.Track, error)
+	SaveTrack(ctx context.Context, track *internal.Track) error
 }

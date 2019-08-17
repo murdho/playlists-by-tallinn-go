@@ -40,7 +40,7 @@ func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
 
 	sys.logger.Debug("loading track from storage")
 
-	track, err := sys.trackStorage.LoadTrack(trackName)
+	track, err := sys.trackStorage.LoadTrack(ctx, trackName)
 	if err != nil {
 		return errors.Wrap(err, "loading track from storage failed")
 	}
@@ -58,7 +58,7 @@ func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
 
 	sys.logger.Debug("saving track to storage")
 
-	if err := sys.trackStorage.SaveTrack(track); err != nil {
+	if err := sys.trackStorage.SaveTrack(ctx, track); err != nil {
 		return errors.Wrap(err, "saving track to storage failed")
 	}
 
