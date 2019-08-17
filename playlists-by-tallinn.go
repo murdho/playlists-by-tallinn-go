@@ -5,60 +5,83 @@ import (
 	"github.com/murdho/playlists-by-tallinn/radio"
 	"github.com/murdho/playlists-by-tallinn/storage"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"log"
 	"os"
 )
 
-var System *system
-
-func NewSystem(raadioTallinn radio.Radio, trackStorage storage.Client) *system {
-	return &system{
-		raadioTallinn: raadioTallinn,
-		trackStorage:  trackStorage,
-	}
-}
-
-type system struct {
-	raadioTallinn radio.Radio
-	trackStorage  storage.Client
-}
+var sys *system
 
 func init() {
 	gcpProject := os.Getenv("GCP_PROJECT")
-	System = NewSystem(
+	debug := os.Getenv("DEBUG") != ""
+
+	InitSystem(
 		radio.NewRaadioTallinn(),
-		storage.NewFirestoreClient(gcpProject, "playlists-by-tallinn"),
+		storage.NewFirestoreStorage(gcpProject, "playlists-by-tallinn"),
+		SetupLogger(debug),
 	)
 }
 
 func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
-	trackName, err := System.raadioTallinn.CurrentTrack()
+	sys.logger.Debug("starting")
+
+	trackName, err := sys.radio.CurrentTrack()
 	if err != nil {
 		return errors.Wrap(err, "getting current track failed")
 	}
 
+	sys.logger.Debug("current track", zap.String("name", trackName))
+
 	if trackName == "" {
+		sys.logger.Debug("current track empty, all done")
 		return nil
 	}
 
-	track, err := System.trackStorage.LoadTrack(ctx, trackName)
+	sys.logger.Debug("loading track from storage")
+
+	track, err := sys.trackStorage.LoadTrack(trackName)
 	if err != nil {
 		return errors.Wrap(err, "loading track from storage failed")
 	}
 
-	defer func() { log.Println(track) }()
+	sys.logger.Debug(
+		"track from storage",
+		zap.String("name", track.Name),
+		zap.Bool("persists", track.Persists),
+	)
 
 	if track.Persists {
+		sys.logger.Debug("track already persists, all done")
 		return nil
 	}
 
-	if err := System.trackStorage.SaveTrack(ctx, track); err != nil {
+	sys.logger.Debug("saving track to storage")
+
+	if err := sys.trackStorage.SaveTrack(track); err != nil {
 		return errors.Wrap(err, "saving track to storage failed")
 	}
+
+	sys.logger.Debug("track saved to storage, all done")
 
 	return nil
 }
 
 type PubSubMessage struct {
 	Data []byte `json:"data"`
+}
+
+func SetupLogger(debug bool) *zap.Logger {
+	config := zap.NewProductionConfig()
+
+	if debug {
+		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	}
+
+	logger, err := config.Build()
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "building zap logger failed"))
+	}
+
+	return logger
 }
