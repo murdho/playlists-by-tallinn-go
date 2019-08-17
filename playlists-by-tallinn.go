@@ -56,6 +56,7 @@ func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
 		return nil
 	}
 
+	track.Persists = true
 	sys.logger.Debug("saving track to storage")
 
 	if err := sys.trackStorage.SaveTrack(ctx, track); err != nil {
