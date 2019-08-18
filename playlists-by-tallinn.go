@@ -10,8 +10,6 @@ import (
 	"os"
 )
 
-var sys *system
-
 func init() {
 	gcpProject := os.Getenv("GCP_PROJECT")
 	debug := os.Getenv("DEBUG") != ""

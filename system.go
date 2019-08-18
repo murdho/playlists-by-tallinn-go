@@ -6,6 +6,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var sys *system
+
 func InitSystem(r Radio, ts TrackStorage, l *zap.Logger) {
 	sys = &system{
 		radio:        r,
