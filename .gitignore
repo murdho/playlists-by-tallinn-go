@@ -16,4 +16,4 @@
 # vendor/
 
 # Ignore our binary
-playlists-by-tallinn
+/playlists-by-tallinn
