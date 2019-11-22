@@ -7,19 +7,23 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/murdho/playlists-by-tallinn/internal"
+	"github.com/murdho/playlists-by-tallinn/internal/logger"
 	"github.com/murdho/playlists-by-tallinn/radio"
 	"github.com/murdho/playlists-by-tallinn/storage"
 )
 
 func init() {
 	gcpProject := os.Getenv("GCP_PROJECT")
-	debug := os.Getenv("DEBUG") != ""
+
+	logLevel := logger.InfoLevel
+	if os.Getenv("DEBUG") != "" {
+		logLevel = logger.DebugLevel
+	}
 
 	InitSystem(
 		radio.NewRaadioTallinn(),
 		storage.NewFirestoreStorage(gcpProject, "playlists-by-tallinn"),
-		internal.NewLogger(debug),
+		logger.New(logLevel),
 	)
 }
 

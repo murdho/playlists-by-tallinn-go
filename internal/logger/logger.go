@@ -1,4 +1,4 @@
-package internal
+package logger
 
 import (
 	"log"
@@ -7,10 +7,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewLogger(debug bool) *zap.Logger {
+type Level int
+
+const (
+	DebugLevel Level = iota
+	InfoLevel
+)
+
+func New(level Level) *zap.Logger {
 	config := zap.NewProductionConfig()
 
-	if debug {
+	if level == DebugLevel {
 		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	}
 

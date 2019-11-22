@@ -6,6 +6,7 @@ import (
 
 	pbt "github.com/murdho/playlists-by-tallinn"
 	"github.com/murdho/playlists-by-tallinn/internal"
+	"github.com/murdho/playlists-by-tallinn/internal/logger"
 )
 
 const (
@@ -16,12 +17,10 @@ const (
 )
 
 func main() {
-	logger := internal.NewLogger(true)
-
 	pbt.InitSystem(
 		new(testRadio),
 		new(testStorage),
-		logger,
+		logger.New(logger.DebugLevel),
 	)
 
 	if err := pbt.PlaylistsByTallinn(context.Background(), pbt.PubSubMessage{}); err != nil {
