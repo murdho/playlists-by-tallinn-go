@@ -4,7 +4,9 @@
 
 I enjoy the music of Raadio Tallinn and created this function for personal use. The data from Firestore can be used in many ways, for example to add new tracks to a playlist in Spotify.
 
-Also a note about the implementation. I tried lazy initialization mostly for trying it out, it seems to perform similarly without laziness as well. :rocket: Next time around I would not do the lazy init. again if not absolutely necessary. I prefer simple and readable code over crazy-optimized code in most of the cases.
+**Note about the lazy initialization**
+
+I tried lazy initialization mostly for trying it out, although it seems to perform similarly without laziness as well. :rocket: Next time around I would not do the lazy init. again if not absolutely necessary. I prefer simple and readable code over crazy-optimized code in most of the cases. :relaxed:
 
 ### Deploy to Google Cloud Functions
 
