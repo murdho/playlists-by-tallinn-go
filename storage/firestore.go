@@ -1,15 +1,17 @@
 package storage
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
 	"crypto/md5"
 	"fmt"
-	"github.com/murdho/playlists-by-tallinn/internal"
-	"github.com/murdho/playlists-by-tallinn/internal/lazyfirestore"
+
+	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/murdho/playlists-by-tallinn/internal"
+	"github.com/murdho/playlists-by-tallinn/internal/lazyfirestore"
 )
 
 func NewFirestoreStorage(gcpProject, collectionName string) *firestoreStorage {

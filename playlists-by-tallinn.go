@@ -2,12 +2,14 @@ package playlistsbytallinn
 
 import (
 	"context"
+	"os"
+
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	"github.com/murdho/playlists-by-tallinn/internal"
 	"github.com/murdho/playlists-by-tallinn/radio"
 	"github.com/murdho/playlists-by-tallinn/storage"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-	"os"
 )
 
 func init() {

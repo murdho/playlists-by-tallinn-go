@@ -1,9 +1,10 @@
 package internal
 
 import (
+	"log"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"log"
 )
 
 func NewLogger(debug bool) *zap.Logger {

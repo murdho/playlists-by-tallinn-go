@@ -2,8 +2,10 @@ package playlistsbytallinn
 
 import (
 	"context"
-	"github.com/murdho/playlists-by-tallinn/internal"
+
 	"go.uber.org/zap"
+
+	"github.com/murdho/playlists-by-tallinn/internal"
 )
 
 var sys *system

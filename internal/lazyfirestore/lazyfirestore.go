@@ -1,8 +1,9 @@
 package lazyfirestore
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+
+	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
 )
 

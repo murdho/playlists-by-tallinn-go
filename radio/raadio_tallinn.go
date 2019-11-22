@@ -2,10 +2,12 @@ package radio
 
 import (
 	"encoding/json"
-	"github.com/murdho/playlists-by-tallinn/internal/lazyhttp"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"log"
+
+	"github.com/pkg/errors"
+
+	"github.com/murdho/playlists-by-tallinn/internal/lazyhttp"
 )
 
 const raadioTallinnRDSURL = "https://raadiotallinn.err.ee/api/rds/getForChannel?channel=raadiotallinn"

@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
+
 	pbt "github.com/murdho/playlists-by-tallinn"
 	"github.com/murdho/playlists-by-tallinn/internal"
-	"log"
 )
 
 const (
