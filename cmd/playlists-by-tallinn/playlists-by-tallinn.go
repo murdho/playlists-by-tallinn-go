@@ -17,13 +17,14 @@ const (
 )
 
 func main() {
-	pbt.InitSystem(
-		new(testRadio),
-		new(testStorage),
-		logger.New(logger.DebugLevel),
+	err := pbt.Run(
+		context.Background(),
+		pbt.WithRadio(new(testRadio)),
+		pbt.WithTrackStorage(new(testStorage)),
+		pbt.WithLogger(logger.New(logger.DebugLevel)),
 	)
 
-	if err := pbt.PlaylistsByTallinn(context.Background(), pbt.PubSubMessage{}); err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 }
