@@ -19,7 +19,7 @@ func NewRaadioTallinn() *raadioTallinn {
 type raadioTallinn struct{}
 
 func (r *raadioTallinn) CurrentTrack() (string, error) {
-	res, err := lazyhttp.NewClient().Get(raadioTallinnRDSURL)
+	res, err := lazyhttp.Client().Get(raadioTallinnRDSURL)
 	if err != nil {
 		return "", errors.Wrap(err, "RDS request failed")
 	}
