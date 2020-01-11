@@ -62,7 +62,7 @@ func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
 	return nil
 }
 
-func Run(ctx context.Context, opts ...Option) error {
+func Run(ctx context.Context, opts ...MachineryOption) error {
 	machinery := &Machinery{}
 
 	for _, opt := range opts {

@@ -68,3 +68,23 @@ func (m *Machinery) StoreTrack(ctx context.Context, name string) error {
 	m.Logger.Debug("track saved to storage")
 	return nil
 }
+
+type MachineryOption func(m *Machinery)
+
+func WithRadio(r Radio) MachineryOption {
+	return func(m *Machinery) {
+		m.Radio = r
+	}
+}
+
+func WithLogger(l *zap.SugaredLogger) MachineryOption {
+	return func(m *Machinery) {
+		m.Logger = l
+	}
+}
+
+func WithTrackStorage(ts TrackStorage) MachineryOption {
+	return func(m *Machinery) {
+		m.TrackStorage = ts
+	}
+}
