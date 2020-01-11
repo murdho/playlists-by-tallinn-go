@@ -12,7 +12,9 @@ import (
 )
 
 func NewTrack(firestore Firestore) *trackStorage {
-	return nil
+	return &trackStorage{
+		firestore: firestore,
+	}
 }
 
 type trackStorage struct {
