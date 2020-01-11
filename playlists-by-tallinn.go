@@ -19,15 +19,8 @@ func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
 		return fmt.Errorf("environment variable GCP_PROJECT required")
 	}
 
-	firestoreCollection, ok := os.LookupEnv("FIRESTORE_COLLECTION")
-	if !ok {
-		firestoreCollection = "playlists-by-tallinn"
-	}
-
-	logLevel, ok := os.LookupEnv("LOG_LEVEL")
-	if !ok {
-		logLevel = "info"
-	}
+	firestoreCollection := envOrDefault("FIRESTORE_COLLECTION", "playlists-by-tallinn")
+	logLevel := envOrDefault("LOG_LEVEL", "info")
 
 	log, err := logger.New(logger.WithLevel(logLevel))
 	if err != nil {
@@ -74,4 +67,13 @@ func Run(ctx context.Context, opts ...MachineryOption) error {
 	}
 
 	return nil
+}
+
+func envOrDefault(key, fallback string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+
+	return val
 }
