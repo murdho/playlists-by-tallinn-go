@@ -2,47 +2,42 @@ package radio
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"log"
-
-	"github.com/pkg/errors"
-
-	"github.com/murdho/playlists-by-tallinn/internal/lazyhttp"
+	"net/http"
 )
 
 const raadioTallinnRDSURL = "https://raadiotallinn.err.ee/api/rds/getForChannel?channel=raadiotallinn"
 
-func NewRaadioTallinn() *raadioTallinn {
-	return new(raadioTallinn)
+func NewRaadioTallinn(httpClient *http.Client) *raadioTallinn {
+	return &raadioTallinn{
+		httpClient: httpClient,
+	}
 }
 
-type raadioTallinn struct{}
+type raadioTallinn struct {
+	httpClient *http.Client
+}
 
 func (r *raadioTallinn) CurrentTrack() (string, error) {
-	res, err := lazyhttp.Client().Get(raadioTallinnRDSURL)
+	res, err := r.httpClient.Get(raadioTallinnRDSURL)
 	if err != nil {
-		return "", errors.Wrap(err, "RDS request failed")
+		return "", fmt.Errorf("RDS request: %w", err)
 	}
-	defer func() {
-		if err := res.Body.Close(); err != nil {
-			log.Fatal(errors.Wrap(err, "closing RDS response body failed"))
-		}
-	}()
+	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", errors.Wrap(err, "reading RDS response body failed")
+		return "", fmt.Errorf("read RDS response: %w", err)
 	}
 
-	var responseBody raadioTallinnRDSResponse
-	if err := json.Unmarshal(body, &responseBody); err != nil {
-		return "", errors.Wrap(err, "unmarshalling RDS response body failed")
+	var rdsResponse struct {
+		RDS string `json:"rds"`
 	}
 
-	return responseBody.RDS, nil
+	if err := json.Unmarshal(body, &rdsResponse); err != nil {
+		return "", fmt.Errorf("unmarshal RDS response: %w", err)
+	}
 
-}
-
-type raadioTallinnRDSResponse struct {
-	RDS string `json:"rds"`
+	return rdsResponse.RDS, nil
 }

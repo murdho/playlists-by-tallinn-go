@@ -5,23 +5,28 @@ import (
 	"log"
 
 	pbt "github.com/murdho/playlists-by-tallinn"
-	"github.com/murdho/playlists-by-tallinn/internal"
-	"github.com/murdho/playlists-by-tallinn/internal/logger"
+	"github.com/murdho/playlists-by-tallinn/logger"
+	"github.com/murdho/playlists-by-tallinn/track"
 )
 
 const (
 	// currentTrack = ""
-	// persists     = false
-	currentTrack = "La La - Land Yo"
-	persists     = true
+	currentTrack         = "La La - Land Yo"
+	trackExistsInStorage = false
+	// trackExistsInStorage = true
 )
 
 func main() {
-	err := pbt.Run(
+	debugLogger, err := logger.New(logger.WithLevel("debug"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = pbt.Run(
 		context.Background(),
 		pbt.WithRadio(new(testRadio)),
 		pbt.WithTrackStorage(new(testStorage)),
-		pbt.WithLogger(logger.New(logger.DebugLevel)),
+		pbt.WithLogger(debugLogger),
 	)
 
 	if err != nil {
@@ -37,15 +42,15 @@ func (tr *testRadio) CurrentTrack() (string, error) {
 
 type testStorage struct{}
 
-func (ts *testStorage) LoadTrack(ctx context.Context, trackName string) (*internal.Track, error) {
-	track := &internal.Track{
-		Name:     currentTrack,
-		Persists: persists,
+func (ts *testStorage) Load(ctx context.Context, name string) (*track.Track, error) {
+	if !trackExistsInStorage {
+		return nil, nil
 	}
 
-	return track, nil
+	track := track.New(currentTrack)
+	return &track, nil
 }
 
-func (ts *testStorage) SaveTrack(ctx context.Context, track *internal.Track) error {
+func (ts *testStorage) Save(ctx context.Context, track track.Track) error {
 	return nil
 }
