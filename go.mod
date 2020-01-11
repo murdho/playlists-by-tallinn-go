@@ -1,6 +1,6 @@
 module github.com/murdho/playlists-by-tallinn
 
-go 1.13
+go 1.11.6
 
 require (
 	cloud.google.com/go/firestore v1.1.1
