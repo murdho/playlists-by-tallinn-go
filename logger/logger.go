@@ -11,7 +11,7 @@ func New(opts ...Option) (*zap.SugaredLogger, error) {
 
 	for _, opt := range opts {
 		if err := opt(&config); err != nil {
-			return nil, fmt.Errorf("apply opts: %w")
+			return nil, fmt.Errorf("apply opts: %w", err)
 		}
 	}
 

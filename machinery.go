@@ -51,7 +51,7 @@ func (m *Machinery) StoreTrack(ctx context.Context, name string) error {
 
 	trk, err := m.TrackStorage.Load(ctx, name)
 	if err != nil {
-		return fmt.Errorf("load track from storage: %w")
+		return fmt.Errorf("load track from storage: %w", err)
 	}
 
 	if trk != nil {
