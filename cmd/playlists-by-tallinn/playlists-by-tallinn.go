@@ -22,14 +22,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = pbt.Run(
-		context.Background(),
+	m := pbt.NewMachinery(
 		pbt.WithRadio(new(testRadio)),
 		pbt.WithTrackStorage(new(testStorage)),
 		pbt.WithLogger(debugLogger),
 	)
 
-	if err != nil {
+	if err := m.Run(context.Background()); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"go.uber.org/zap"
-
 	"github.com/murdho/playlists-by-tallinn/track"
 )
+
+//go:generate moq -out machinery_moq_test.go . Radio TrackStorage Logger
 
 type Radio interface {
 	CurrentTrack() (string, error)
@@ -18,10 +18,25 @@ type TrackStorage interface {
 	Save(ctx context.Context, track track.Track) error
 }
 
+type Logger interface {
+	Infow(msg string, keysAndValues ...interface{})
+	Debug(args ...interface{})
+}
+
 type Machinery struct {
 	Radio        Radio
 	TrackStorage TrackStorage
-	Logger       *zap.SugaredLogger
+	Logger       Logger
+}
+
+func NewMachinery(opts ...MachineryOption) Machinery {
+	m := Machinery{}
+
+	for _, opt := range opts {
+		opt(&m)
+	}
+
+	return m
 }
 
 func (m *Machinery) Run(ctx context.Context) error {
@@ -77,14 +92,14 @@ func WithRadio(r Radio) MachineryOption {
 	}
 }
 
-func WithLogger(l *zap.SugaredLogger) MachineryOption {
-	return func(m *Machinery) {
-		m.Logger = l
-	}
-}
-
 func WithTrackStorage(ts TrackStorage) MachineryOption {
 	return func(m *Machinery) {
 		m.TrackStorage = ts
+	}
+}
+
+func WithLogger(l Logger) MachineryOption {
+	return func(m *Machinery) {
+		m.Logger = l
 	}
 }

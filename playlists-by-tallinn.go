@@ -41,28 +41,13 @@ func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
 
 	trackStorage := storage.NewTrack(firestoreClient)
 
-	err = Run(
-		ctx,
+	m := NewMachinery(
 		WithRadio(raadioTallinn),
 		WithTrackStorage(trackStorage),
 		WithLogger(log),
 	)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func Run(ctx context.Context, opts ...MachineryOption) error {
-	machinery := &Machinery{}
-
-	for _, opt := range opts {
-		opt(machinery)
-	}
-
-	if err := machinery.Run(ctx); err != nil {
+	if err := m.Run(ctx); err != nil {
 		return err
 	}
 
