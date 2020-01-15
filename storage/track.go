@@ -28,7 +28,7 @@ func (t *trackStorage) Load(ctx context.Context, name string) (*track.Track, err
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get trackStorage from firestore: %w", err)
+		return nil, fmt.Errorf("get track from firestore: %w", err)
 	}
 
 	return &trk, nil
@@ -36,7 +36,7 @@ func (t *trackStorage) Load(ctx context.Context, name string) (*track.Track, err
 
 func (t *trackStorage) Save(ctx context.Context, track track.Track) error {
 	if err := t.firestore.Set(ctx, documentID(track.Name), track); err != nil {
-		return fmt.Errorf("add trackStorage to firestore: %w", err)
+		return fmt.Errorf("add track to firestore: %w", err)
 	}
 
 	return nil
