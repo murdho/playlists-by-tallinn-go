@@ -15,7 +15,7 @@ type Radio interface {
 
 type TrackStorage interface {
 	Load(ctx context.Context, name string) (*track.Track, error)
-	Save(ctx context.Context, track track.Track) error
+	Save(ctx context.Context, trk track.Track) error
 }
 
 type Logger interface {

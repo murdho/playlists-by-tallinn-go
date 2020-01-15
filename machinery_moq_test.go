@@ -88,7 +88,7 @@ var _ TrackStorage = &TrackStorageMock{}
 //             LoadFunc: func(ctx context.Context, name string) (*track.Track, error) {
 // 	               panic("mock out the Load method")
 //             },
-//             SaveFunc: func(ctx context.Context, track track.Track) error {
+//             SaveFunc: func(ctx context.Context, trk track.Track) error {
 // 	               panic("mock out the Save method")
 //             },
 //         }
@@ -102,7 +102,7 @@ type TrackStorageMock struct {
 	LoadFunc func(ctx context.Context, name string) (*track.Track, error)
 
 	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, track track.Track) error
+	SaveFunc func(ctx context.Context, trk track.Track) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -117,8 +117,8 @@ type TrackStorageMock struct {
 		Save []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Track is the track argument value.
-			Track track.Track
+			// Trk is the trk argument value.
+			Trk track.Track
 		}
 	}
 }
@@ -159,33 +159,33 @@ func (mock *TrackStorageMock) LoadCalls() []struct {
 }
 
 // Save calls SaveFunc.
-func (mock *TrackStorageMock) Save(ctx context.Context, track track.Track) error {
+func (mock *TrackStorageMock) Save(ctx context.Context, trk track.Track) error {
 	if mock.SaveFunc == nil {
 		panic("TrackStorageMock.SaveFunc: method is nil but TrackStorage.Save was just called")
 	}
 	callInfo := struct {
-		Ctx   context.Context
-		Track track.Track
+		Ctx context.Context
+		Trk track.Track
 	}{
-		Ctx:   ctx,
-		Track: track,
+		Ctx: ctx,
+		Trk: trk,
 	}
 	lockTrackStorageMockSave.Lock()
 	mock.calls.Save = append(mock.calls.Save, callInfo)
 	lockTrackStorageMockSave.Unlock()
-	return mock.SaveFunc(ctx, track)
+	return mock.SaveFunc(ctx, trk)
 }
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
 //     len(mockedTrackStorage.SaveCalls())
 func (mock *TrackStorageMock) SaveCalls() []struct {
-	Ctx   context.Context
-	Track track.Track
+	Ctx context.Context
+	Trk track.Track
 } {
 	var calls []struct {
-		Ctx   context.Context
-		Track track.Track
+		Ctx context.Context
+		Trk track.Track
 	}
 	lockTrackStorageMockSave.RLock()
 	calls = mock.calls.Save
