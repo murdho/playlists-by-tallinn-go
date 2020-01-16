@@ -13,6 +13,8 @@ import (
 	"github.com/murdho/playlists-by-tallinn/storage"
 )
 
+const raadioTallinnURL = "https://raadiotallinn.err.ee/api/rds/getForChannel?channel=raadiotallinn"
+
 func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
 	gcpProject, ok := os.LookupEnv("GCP_PROJECT")
 	if !ok {
@@ -28,7 +30,10 @@ func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
 	}
 
 	httpClient := &http.Client{Timeout: 2 * time.Second}
-	raadioTallinn := radio.NewRaadioTallinn(httpClient)
+	raadioTallinn := radio.NewRaadioTallinn(
+		radio.WithURL(raadioTallinnURL),
+		radio.WithHTTPClient(httpClient),
+	)
 
 	firestoreClient, err := firestore.New(
 		ctx,

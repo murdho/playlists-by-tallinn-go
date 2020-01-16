@@ -4,23 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 )
 
-const raadioTallinnRDSURL = "https://raadiotallinn.err.ee/api/rds/getForChannel?channel=raadiotallinn"
-
-func NewRaadioTallinn(httpClient *http.Client) *raadioTallinn {
-	return &raadioTallinn{
-		httpClient: httpClient,
+func NewRaadioTallinn(opts ...option) raadioTallinn {
+	rt := raadioTallinn{
+		radio: new(radio),
 	}
+
+	for _, opt := range opts {
+		opt(rt.radio)
+	}
+
+	return rt
 }
 
 type raadioTallinn struct {
-	httpClient *http.Client
+	*radio
 }
 
-func (r *raadioTallinn) CurrentTrack() (string, error) {
-	res, err := r.httpClient.Get(raadioTallinnRDSURL)
+func (r raadioTallinn) CurrentTrack() (string, error) {
+	res, err := r.httpClient.Get(r.url)
 	if err != nil {
 		return "", fmt.Errorf("RDS request: %w", err)
 	}
