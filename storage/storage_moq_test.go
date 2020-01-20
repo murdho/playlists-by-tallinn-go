@@ -5,7 +5,6 @@ package storage
 
 import (
 	"context"
-	"github.com/murdho/playlists-by-tallinn/firestore"
 	"sync"
 )
 
@@ -24,10 +23,10 @@ var _ Firestore = &FirestoreMock{}
 //
 //         // make and configure a mocked Firestore
 //         mockedFirestore := &FirestoreMock{
-//             GetFunc: func(ctx context.Context, dataTo interface{}, documentID string, opts ...firestore.Option) error {
+//             GetFunc: func(ctx context.Context, dataTo interface{}, documentID string) error {
 // 	               panic("mock out the Get method")
 //             },
-//             SetFunc: func(ctx context.Context, documentID string, data interface{}, opts ...firestore.Option) error {
+//             SetFunc: func(ctx context.Context, documentID string, data interface{}) error {
 // 	               panic("mock out the Set method")
 //             },
 //         }
@@ -38,10 +37,10 @@ var _ Firestore = &FirestoreMock{}
 //     }
 type FirestoreMock struct {
 	// GetFunc mocks the Get method.
-	GetFunc func(ctx context.Context, dataTo interface{}, documentID string, opts ...firestore.Option) error
+	GetFunc func(ctx context.Context, dataTo interface{}, documentID string) error
 
 	// SetFunc mocks the Set method.
-	SetFunc func(ctx context.Context, documentID string, data interface{}, opts ...firestore.Option) error
+	SetFunc func(ctx context.Context, documentID string, data interface{}) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -53,8 +52,6 @@ type FirestoreMock struct {
 			DataTo interface{}
 			// DocumentID is the documentID argument value.
 			DocumentID string
-			// Opts is the opts argument value.
-			Opts []firestore.Option
 		}
 		// Set holds details about calls to the Set method.
 		Set []struct {
@@ -64,14 +61,12 @@ type FirestoreMock struct {
 			DocumentID string
 			// Data is the data argument value.
 			Data interface{}
-			// Opts is the opts argument value.
-			Opts []firestore.Option
 		}
 	}
 }
 
 // Get calls GetFunc.
-func (mock *FirestoreMock) Get(ctx context.Context, dataTo interface{}, documentID string, opts ...firestore.Option) error {
+func (mock *FirestoreMock) Get(ctx context.Context, dataTo interface{}, documentID string) error {
 	if mock.GetFunc == nil {
 		panic("FirestoreMock.GetFunc: method is nil but Firestore.Get was just called")
 	}
@@ -79,17 +74,15 @@ func (mock *FirestoreMock) Get(ctx context.Context, dataTo interface{}, document
 		Ctx        context.Context
 		DataTo     interface{}
 		DocumentID string
-		Opts       []firestore.Option
 	}{
 		Ctx:        ctx,
 		DataTo:     dataTo,
 		DocumentID: documentID,
-		Opts:       opts,
 	}
 	lockFirestoreMockGet.Lock()
 	mock.calls.Get = append(mock.calls.Get, callInfo)
 	lockFirestoreMockGet.Unlock()
-	return mock.GetFunc(ctx, dataTo, documentID, opts...)
+	return mock.GetFunc(ctx, dataTo, documentID)
 }
 
 // GetCalls gets all the calls that were made to Get.
@@ -99,13 +92,11 @@ func (mock *FirestoreMock) GetCalls() []struct {
 	Ctx        context.Context
 	DataTo     interface{}
 	DocumentID string
-	Opts       []firestore.Option
 } {
 	var calls []struct {
 		Ctx        context.Context
 		DataTo     interface{}
 		DocumentID string
-		Opts       []firestore.Option
 	}
 	lockFirestoreMockGet.RLock()
 	calls = mock.calls.Get
@@ -114,7 +105,7 @@ func (mock *FirestoreMock) GetCalls() []struct {
 }
 
 // Set calls SetFunc.
-func (mock *FirestoreMock) Set(ctx context.Context, documentID string, data interface{}, opts ...firestore.Option) error {
+func (mock *FirestoreMock) Set(ctx context.Context, documentID string, data interface{}) error {
 	if mock.SetFunc == nil {
 		panic("FirestoreMock.SetFunc: method is nil but Firestore.Set was just called")
 	}
@@ -122,17 +113,15 @@ func (mock *FirestoreMock) Set(ctx context.Context, documentID string, data inte
 		Ctx        context.Context
 		DocumentID string
 		Data       interface{}
-		Opts       []firestore.Option
 	}{
 		Ctx:        ctx,
 		DocumentID: documentID,
 		Data:       data,
-		Opts:       opts,
 	}
 	lockFirestoreMockSet.Lock()
 	mock.calls.Set = append(mock.calls.Set, callInfo)
 	lockFirestoreMockSet.Unlock()
-	return mock.SetFunc(ctx, documentID, data, opts...)
+	return mock.SetFunc(ctx, documentID, data)
 }
 
 // SetCalls gets all the calls that were made to Set.
@@ -142,13 +131,11 @@ func (mock *FirestoreMock) SetCalls() []struct {
 	Ctx        context.Context
 	DocumentID string
 	Data       interface{}
-	Opts       []firestore.Option
 } {
 	var calls []struct {
 		Ctx        context.Context
 		DocumentID string
 		Data       interface{}
-		Opts       []firestore.Option
 	}
 	lockFirestoreMockSet.RLock()
 	calls = mock.calls.Set

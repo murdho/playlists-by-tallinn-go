@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/murdho/playlists-by-tallinn/firestore"
 	"github.com/murdho/playlists-by-tallinn/track"
 )
 
@@ -25,7 +24,7 @@ func TestNewTrack(t *testing.T) {
 func TestTrackStorage_Load(t *testing.T) {
 	var gotDocumentID string
 	fs := &FirestoreMock{
-		GetFunc: func(_ context.Context, dataTo interface{}, documentID string, _ ...firestore.Option) error {
+		GetFunc: func(_ context.Context, dataTo interface{}, documentID string) error {
 			dataTo.(*track.Track).Name = "b"
 			gotDocumentID = documentID
 			return nil
@@ -51,7 +50,7 @@ func TestTrackStorage_Load(t *testing.T) {
 
 func TestTrackStorage_LoadErrNotFound(t *testing.T) {
 	fs := &FirestoreMock{
-		GetFunc: func(_ context.Context, _ interface{}, _ string, _ ...firestore.Option) error {
+		GetFunc: func(_ context.Context, _ interface{}, _ string) error {
 			return status.Error(codes.NotFound, "")
 		},
 	}
@@ -70,7 +69,7 @@ func TestTrackStorage_LoadErrNotFound(t *testing.T) {
 func TestTrackStorage_LoadErr(t *testing.T) {
 	expectedErr := errors.New("x")
 	fs := &FirestoreMock{
-		GetFunc: func(_ context.Context, _ interface{}, _ string, _ ...firestore.Option) error {
+		GetFunc: func(_ context.Context, _ interface{}, _ string) error {
 			return expectedErr
 		},
 	}
@@ -91,7 +90,7 @@ func TestTrackStorage_Save(t *testing.T) {
 	var gotDocumentID string
 	var gotTrack track.Track
 	fs := &FirestoreMock{
-		SetFunc: func(_ context.Context, documentID string, data interface{}, _ ...firestore.Option) error {
+		SetFunc: func(_ context.Context, documentID string, data interface{}) error {
 			gotDocumentID = documentID
 			gotTrack = data.(track.Track)
 			return nil
@@ -119,7 +118,7 @@ func TestTrackStorage_Save(t *testing.T) {
 func TestTrackStorage_SaveErr(t *testing.T) {
 	expectedErr := errors.New("x")
 	fs := &FirestoreMock{
-		SetFunc: func(_ context.Context, _ string, _ interface{}, _ ...firestore.Option) error {
+		SetFunc: func(_ context.Context, _ string, _ interface{}) error {
 			return expectedErr
 		},
 	}
