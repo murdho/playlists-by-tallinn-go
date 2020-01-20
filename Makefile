@@ -7,6 +7,9 @@ build:
 test:
 	@go test ./...
 
+test-all:
+	@go test ./... -tags=integration
+
 cov:
 	@go test ./... -coverprofile cover.out
 	@go tool cover -html=cover.out
