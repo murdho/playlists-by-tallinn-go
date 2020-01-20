@@ -87,6 +87,51 @@ func TestTrackStorage_LoadErr(t *testing.T) {
 	}
 }
 
+func TestTrackStorage_Save(t *testing.T) {
+	var gotDocumentID string
+	var gotTrack track.Track
+	fs := &FirestoreMock{
+		SetFunc: func(_ context.Context, documentID string, data interface{}, _ ...firestore.Option) error {
+			gotDocumentID = documentID
+			gotTrack = data.(track.Track)
+			return nil
+		},
+	}
+
+	trk := track.New("a")
+
+	trackStorage := NewTrack(fs)
+	err := trackStorage.Save(context.Background(), trk)
+	if err != nil {
+		t.Errorf("unexpected error: %+v", err)
+	}
+
+	expectedDocumentID := documentID("a")
+	if gotDocumentID != expectedDocumentID {
+		t.Errorf("track save document ID:\ngot  %+v\nwant %+v", gotDocumentID, expectedDocumentID)
+	}
+
+	if gotTrack != trk {
+		t.Errorf("track save track:\ngot  %+v\nwant %+v", gotTrack, trk)
+	}
+}
+
+func TestTrackStorage_SaveErr(t *testing.T) {
+	expectedErr := errors.New("x")
+	fs := &FirestoreMock{
+		SetFunc: func(_ context.Context, _ string, _ interface{}, _ ...firestore.Option) error {
+			return expectedErr
+		},
+	}
+
+	trackStorage := NewTrack(fs)
+	err := trackStorage.Save(context.Background(), track.New("a"))
+
+	if !errors.Is(err, expectedErr) {
+		t.Errorf("track save err:\ngot  %+v\nwant %+v", err, expectedErr)
+	}
+}
+
 func TestDocumentID(t *testing.T) {
 	name := "a"
 	expectedDocumentID := "0cc175b9c0f1b6a831c399e269772661"

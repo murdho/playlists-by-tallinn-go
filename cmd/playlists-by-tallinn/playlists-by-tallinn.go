@@ -46,8 +46,8 @@ func (ts *testStorage) Load(ctx context.Context, name string) (*track.Track, err
 		return nil, nil
 	}
 
-	track := track.New(currentTrack)
-	return &track, nil
+	trk := track.New(currentTrack)
+	return &trk, nil
 }
 
 func (ts *testStorage) Save(ctx context.Context, track track.Track) error {
