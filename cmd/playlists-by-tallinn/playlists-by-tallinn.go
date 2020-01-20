@@ -17,9 +17,33 @@ const (
 )
 
 func main() {
+	// Firestore emulator:
+	// 		gcloud beta emulators firestore start
+	//
+	// os.Setenv("GCP_PROJECT", "bla")
+	// os.Setenv("FIRESTORE_EMULATOR_HOST", "8277")
+	//
+	// if err := runReal(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	if err := runFake(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runReal() error {
+	if err := pbt.PlaylistsByTallinn(context.Background(), struct{}{}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runFake() error {
 	debugLogger, err := logger.New(logger.WithLevel("debug"))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	m := pbt.NewMachinery(
@@ -29,8 +53,10 @@ func main() {
 	)
 
 	if err := m.Run(context.Background()); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 type testRadio struct{}
