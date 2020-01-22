@@ -3,12 +3,11 @@ package storage
 import (
 	"context"
 	"crypto/md5"
+	"errors"
 	"fmt"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
-	track "github.com/murdho/playlists-by-tallinn/track"
+	"github.com/murdho/playlists-by-tallinn/firestore"
+	"github.com/murdho/playlists-by-tallinn/track"
 )
 
 func NewTrack(firestore Firestore) *trackStorage {
@@ -24,7 +23,7 @@ type trackStorage struct {
 func (t *trackStorage) Load(ctx context.Context, name string) (*track.Track, error) {
 	var trk track.Track
 	if err := t.firestore.Get(ctx, &trk, documentID(name)); err != nil {
-		if status.Code(err) == codes.NotFound {
+		if errors.Is(err, firestore.ErrNotFound) {
 			return nil, nil
 		}
 

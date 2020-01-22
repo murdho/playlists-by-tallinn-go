@@ -2,11 +2,16 @@ package firestore
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	cloudfirestore "cloud.google.com/go/firestore"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+)
+
+var (
+	ErrNotFound = errors.New("not found")
 )
 
 func New(ctx context.Context, opts ...option) (*firestore, error) {
@@ -34,7 +39,7 @@ func (fs firestore) Get(ctx context.Context, dataTo interface{}, documentID stri
 	snapshot, err := fs.client.Collection(fs.collection).Doc(documentID).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			return err
+			return ErrNotFound
 		}
 
 		return fmt.Errorf("get document: %w", err)
@@ -54,6 +59,10 @@ func (fs firestore) Set(ctx context.Context, documentID string, data interface{}
 	}
 
 	return nil
+}
+
+func (fs firestore) Close() error {
+	return fs.client.Close()
 }
 
 func (fs *firestore) applyOptions(opts []option) {

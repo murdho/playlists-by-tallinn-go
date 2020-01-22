@@ -43,6 +43,11 @@ func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
 	if err != nil {
 		return fmt.Errorf("new firestore client: %w", err)
 	}
+	defer func() {
+		if err := firestoreClient.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
 
 	trackStorage := storage.NewTrack(firestoreClient)
 

@@ -14,6 +14,10 @@ cov:
 	@go test ./... -coverprofile cover.out
 	@go tool cover -html=cover.out
 
+cov-all:
+	@go test ./... -coverprofile cover.out -tags=integration
+	@go tool cover -html=cover.out
+
 generate:
 	@go generate ./...
 

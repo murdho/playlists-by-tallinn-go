@@ -6,9 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
+	"github.com/murdho/playlists-by-tallinn/firestore"
 	"github.com/murdho/playlists-by-tallinn/track"
 )
 
@@ -51,7 +49,7 @@ func TestTrackStorage_Load(t *testing.T) {
 func TestTrackStorage_LoadErrNotFound(t *testing.T) {
 	fs := &FirestoreMock{
 		GetFunc: func(_ context.Context, _ interface{}, _ string) error {
-			return status.Error(codes.NotFound, "")
+			return firestore.ErrNotFound
 		},
 	}
 
