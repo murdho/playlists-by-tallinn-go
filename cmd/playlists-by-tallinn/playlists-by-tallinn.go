@@ -5,27 +5,58 @@ import (
 	"log"
 
 	pbt "github.com/murdho/playlists-by-tallinn"
-	"github.com/murdho/playlists-by-tallinn/internal"
-	"github.com/murdho/playlists-by-tallinn/internal/logger"
+	"github.com/murdho/playlists-by-tallinn/logger"
+	"github.com/murdho/playlists-by-tallinn/track"
 )
 
 const (
 	// currentTrack = ""
-	// persists     = false
-	currentTrack = "La La - Land Yo"
-	persists     = true
+	currentTrack         = "La La - Land Yo"
+	trackExistsInStorage = false
+	// trackExistsInStorage = true
 )
 
 func main() {
-	pbt.InitSystem(
-		new(testRadio),
-		new(testStorage),
-		logger.New(logger.DebugLevel),
-	)
+	// Firestore emulator:
+	// 		gcloud beta emulators firestore start
+	//
+	// os.Setenv("GCP_PROJECT", "bla")
+	// os.Setenv("FIRESTORE_EMULATOR_HOST", "8277")
+	//
+	// if err := runReal(); err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	if err := pbt.PlaylistsByTallinn(context.Background(), pbt.PubSubMessage{}); err != nil {
+	if err := runFake(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func runReal() error {
+	if err := pbt.PlaylistsByTallinn(context.Background(), struct{}{}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runFake() error {
+	debugLogger, err := logger.New(logger.WithLevel("debug"))
+	if err != nil {
+		return err
+	}
+
+	m := pbt.NewMachinery(
+		pbt.WithRadio(new(testRadio)),
+		pbt.WithTrackStorage(new(testStorage)),
+		pbt.WithLogger(debugLogger),
+	)
+
+	if err := m.Run(context.Background()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type testRadio struct{}
@@ -36,15 +67,15 @@ func (tr *testRadio) CurrentTrack() (string, error) {
 
 type testStorage struct{}
 
-func (ts *testStorage) LoadTrack(ctx context.Context, trackName string) (*internal.Track, error) {
-	track := &internal.Track{
-		Name:     currentTrack,
-		Persists: persists,
+func (ts *testStorage) Load(ctx context.Context, name string) (*track.Track, error) {
+	if !trackExistsInStorage {
+		return nil, nil
 	}
 
-	return track, nil
+	trk := track.New(currentTrack)
+	return &trk, nil
 }
 
-func (ts *testStorage) SaveTrack(ctx context.Context, track *internal.Track) error {
+func (ts *testStorage) Save(ctx context.Context, track track.Track) error {
 	return nil
 }

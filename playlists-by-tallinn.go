@@ -2,76 +2,73 @@ package playlistsbytallinn
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"os"
+	"time"
 
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
-	"github.com/murdho/playlists-by-tallinn/internal/logger"
+	"github.com/murdho/playlists-by-tallinn/firestore"
+	"github.com/murdho/playlists-by-tallinn/logger"
 	"github.com/murdho/playlists-by-tallinn/radio"
 	"github.com/murdho/playlists-by-tallinn/storage"
 )
 
-func init() {
-	gcpProject := os.Getenv("GCP_PROJECT")
+const raadioTallinnURL = "https://raadiotallinn.err.ee/api/rds/getForChannel?channel=raadiotallinn"
 
-	logLevel := logger.InfoLevel
-	if os.Getenv("DEBUG") != "" {
-		logLevel = logger.DebugLevel
+func PlaylistsByTallinn(ctx context.Context, _ struct{}) error {
+	gcpProject, ok := os.LookupEnv("GCP_PROJECT")
+	if !ok {
+		return fmt.Errorf("environment variable GCP_PROJECT required")
 	}
 
-	InitSystem(
-		radio.NewRaadioTallinn(),
-		storage.NewFirestoreStorage(gcpProject, "playlists-by-tallinn"),
-		logger.New(logLevel),
-	)
-}
+	firestoreCollection := envOrDefault("FIRESTORE_COLLECTION", "playlists-by-tallinn")
+	logLevel := envOrDefault("LOG_LEVEL", "info")
 
-func PlaylistsByTallinn(ctx context.Context, _ PubSubMessage) error {
-	sys.logger.Debug("starting")
-
-	trackName, err := sys.radio.CurrentTrack()
+	log, err := logger.New(logger.WithLevel(logLevel))
 	if err != nil {
-		return errors.Wrap(err, "getting current track failed")
+		return fmt.Errorf("new logger: %w", err)
 	}
 
-	sys.logger.Info("current track", zap.String("name", trackName))
-
-	if trackName == "" {
-		sys.logger.Debug("current track empty, all done")
-		return nil
-	}
-
-	sys.logger.Debug("loading track from storage")
-
-	track, err := sys.trackStorage.LoadTrack(ctx, trackName)
-	if err != nil {
-		return errors.Wrap(err, "loading track from storage failed")
-	}
-
-	sys.logger.Debug(
-		"track from storage",
-		zap.String("name", track.Name),
-		zap.Bool("persists", track.Persists),
+	httpClient := &http.Client{Timeout: 2 * time.Second}
+	raadioTallinn := radio.NewRaadioTallinn(
+		radio.WithURL(raadioTallinnURL),
+		radio.WithHTTPClient(httpClient),
 	)
 
-	if track.Persists {
-		sys.logger.Debug("track already persists, all done")
-		return nil
+	firestoreClient, err := firestore.New(
+		ctx,
+		firestore.Project(gcpProject),
+		firestore.Collection(firestoreCollection),
+	)
+	if err != nil {
+		return fmt.Errorf("new firestore client: %w", err)
 	}
+	defer func() {
+		if err := firestoreClient.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
 
-	track.Persists = true
-	sys.logger.Debug("saving track to storage")
+	trackStorage := storage.NewTrack(firestoreClient)
 
-	if err := sys.trackStorage.SaveTrack(ctx, track); err != nil {
-		return errors.Wrap(err, "saving track to storage failed")
+	m := NewMachinery(
+		WithRadio(raadioTallinn),
+		WithTrackStorage(trackStorage),
+		WithLogger(log),
+	)
+
+	if err := m.Run(ctx); err != nil {
+		return err
 	}
-
-	sys.logger.Debug("track saved to storage, all done")
 
 	return nil
 }
 
-type PubSubMessage struct {
-	Data []byte `json:"data"`
+func envOrDefault(key, fallback string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+
+	return val
 }
